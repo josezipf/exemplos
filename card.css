@@ -1,0 +1,148 @@
+.noc-wrapper {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.noc-card {
+  --status-color: #8498aa;
+
+  width: 100%;
+  min-height: 500px;
+  padding: 28px;
+  box-sizing: border-box;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  color: #eef7fa;
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      color-mix(in srgb, var(--status-color) 13%, transparent),
+      transparent 38%
+    ),
+    linear-gradient(145deg, #102231, #091722);
+
+  border: 1px solid #20394b;
+  border-top: 3px solid var(--status-color);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.noc-card[data-state="online"] {
+  --status-color: #36e59b;
+}
+
+.noc-card[data-state="degraded"] {
+  --status-color: #ffbd59;
+}
+
+.noc-card[data-state="offline"] {
+  --status-color: #ff5570;
+}
+
+.noc-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.noc-eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: #8fa7ba;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.noc-header h2 {
+  margin: 0;
+  color: #f4f9fb;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.noc-status {
+  padding: 11px 16px;
+  color: var(--status-color);
+  background: color-mix(in srgb, var(--status-color) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--status-color) 35%, transparent);
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.noc-main {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin: 35px 0 20px;
+}
+
+.noc-metric {
+  min-height: 105px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: rgba(3, 14, 23, 0.46);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+}
+
+.noc-metric span {
+  margin-bottom: 14px;
+  color: #829aae;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+
+.noc-metric strong {
+  color: var(--status-color);
+  font-size: 27px;
+  font-weight: 500;
+}
+
+.traffic-rx strong {
+  color: #55dbea;
+}
+
+.traffic-tx strong {
+  color: #6c91ff;
+}
+
+.noc-footer {
+  padding-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #718a9d;
+  font-size: 11px;
+}
+
+.noc-footer strong {
+  color: var(--status-color);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+}
+
+@media (max-width: 650px) {
+  .noc-main {
+    grid-template-columns: 1fr;
+  }
+
+  .noc-card {
+    min-height: auto;
+  }
+}
