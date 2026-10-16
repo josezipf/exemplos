@@ -1,0 +1,390 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_ALEXANDERZOBNIN-ZABBIX-DATASOURCE",
+      "label": "alexanderzobnin-zabbix-datasource",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "alexanderzobnin-zabbix-datasource",
+      "pluginName": "Zabbix"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "datasource",
+      "id": "alexanderzobnin-zabbix-datasource",
+      "name": "Zabbix",
+      "version": "6.9.1"
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "12.4.0"
+    },
+    {
+      "type": "panel",
+      "id": "marcusolsson-dynamictext-panel",
+      "name": "Business Text",
+      "version": "6.3.0"
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "alexanderzobnin-zabbix-datasource",
+        "uid": "${DS_ALEXANDERZOBNIN-ZABBIX-DATASOURCE}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "options": {
+        "afterRender": "",
+        "content": "<div class=\"nt-flip\">\n  <div class=\"nt-inner\">\n    <div class=\"nt-card nt-face\">\n      <div class=\"nt-main\">\n        <span class=\"nt-label\">CPU</span>\n        <span class=\"nt-value\">{{fmt cpu}}<small>%</small></span>\n        <div class=\"nt-bar\">\n          <div class=\"nt-fill\" style=\"width: {{cpu}}%\"></div>\n        </div>\n        <span class=\"nt-hint\">passe o mouse para virar</span>\n      </div>\n    </div>\n    <div class=\"nt-card nt-face nt-back\">\n      <div class=\"nt-main\">\n        <span class=\"nt-label nt-accent\">Detalhes da CPU</span>\n        <div class=\"nt-row\"><span>Load 1m</span><b>{{fmt load1}}</b></div>\n        <div class=\"nt-row\"><span>Núcleos</span><b>{{cores}}</b></div>\n        <div class=\"nt-row\"><span>Uptime</span><b>{{uptime uptime}}</b></div>\n      </div>\n    </div>\n  </div>\n</div>",
+        "contentPartials": [],
+        "defaultContent": "Sem dados",
+        "editor": {
+          "format": "auto",
+          "language": "html"
+        },
+        "editors": [
+          "helpers",
+          "styles"
+        ],
+        "externalScripts": [],
+        "externalStyles": [],
+        "helpers": "// Limiares do alerta (baixe para 5/10 para demonstrar o pulso no vídeo)\nconst WARN = 50;\nconst CRIT = 80;\n\ncontext.handlebars.registerHelper(\"fmt\", (v) => {\n  const n = Number(v);\n  return isNaN(n) ? \"-\" : n.toFixed(1);\n});\n\ncontext.handlebars.registerHelper(\"uptime\", (v) => {\n  const s = Number(v);\n  if (isNaN(s)) return \"-\";\n  const d = Math.floor(s / 86400);\n  const h = Math.floor((s % 86400) / 3600);\n  const m = Math.floor((s % 3600) / 60);\n  return d > 0 ? `${d}d ${h}h` : `${h}h ${m}m`;\n});\n\ncontext.handlebars.registerHelper(\"level\", (v) => {\n  const n = Number(v);\n  if (n >= CRIT) return \"crit\";\n  if (n >= WARN) return \"warn\";\n  return \"ok\";\n});\n\ncontext.handlebars.registerHelper(\"levelText\", (v) => {\n  const n = Number(v);\n  if (n >= CRIT) return \"CRÍTICO\";\n  if (n >= WARN) return \"ATENÇÃO\";\n  return \"NORMAL\";\n});",
+        "renderMode": "everyRow",
+        "styles": ".nt-card {\n  position: relative;\n  height: 100%;\n  min-height: 150px;\n  box-sizing: border-box;\n  background: #0d1117;\n  border: 1px solid #1f2a30;\n  border-radius: 12px;\n  overflow: hidden;\n  font-family: Inter, sans-serif;\n  color: #e6edf3;\n  cursor: default;\n}\n.nt-main {\n  padding: 16px;\n  display: flex;\n  flex-direction: column;\n  gap: 6px;\n}\n.nt-label {\n  font-size: 12px;\n  letter-spacing: .08em;\n  text-transform: uppercase;\n  color: #8b949e;\n}\n.nt-value {\n  font-size: 40px;\n  font-weight: 700;\n  line-height: 1;\n}\n.nt-value small {\n  font-size: 18px;\n  color: #8b949e;\n  margin-left: 2px;\n}\n.nt-bar {\n  height: 6px;\n  background: #1f2a30;\n  border-radius: 3px;\n  overflow: hidden;\n}\n.nt-fill {\n  height: 100%;\n  background: #0f9d8a;\n  border-radius: 3px;\n  transition: width .4s ease;\n}\n.nt-hint {\n  font-size: 11px;\n  color: #57606a;\n}\n.nt-row {\n  display: flex;\n  justify-content: space-between;\n  font-size: 13px;\n  border-bottom: 1px solid #1f2a30;\n  padding-bottom: 4px;\n}\n.nt-row span { color: #8b949e; }\n\n.nt-flip {\n  height: 100%;\n  min-height: 150px;\n  perspective: 1000px;\n}\n.nt-inner {\n  position: relative;\n  height: 100%;\n  min-height: 150px;\n  transition: transform .7s cubic-bezier(.4, .2, .2, 1);\n  transform-style: preserve-3d;\n}\n.nt-flip:hover .nt-inner {\n  transform: rotateY(180deg);\n}\n.nt-card.nt-face {\n  position: absolute;\n  inset: 0;\n  -webkit-backface-visibility: hidden;\n  backface-visibility: hidden;\n}\n.nt-card.nt-back {\n  transform: rotateY(180deg);\n  border-top: 3px solid #0f9d8a;\n}\n.nt-accent { color: #0f9d8a; }\n",
+        "wrap": false
+      },
+      "pluginVersion": "6.3.0",
+      "targets": [
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ALEXANDERZOBNIN-ZABBIX-DATASOURCE}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "Linux servers"
+          },
+          "host": {
+            "filter": "LINUX"
+          },
+          "item": {
+            "filter": "Linux: CPU utilization"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "schema": 13,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ALEXANDERZOBNIN-ZABBIX-DATASOURCE}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "Linux servers"
+          },
+          "host": {
+            "filter": "LINUX"
+          },
+          "item": {
+            "filter": "Linux: Number of CPUs"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "B",
+          "resultFormat": "time_series",
+          "schema": 13,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ALEXANDERZOBNIN-ZABBIX-DATASOURCE}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "Linux servers"
+          },
+          "host": {
+            "filter": "LINUX"
+          },
+          "item": {
+            "filter": "Linux: Load average (1m avg)"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "C",
+          "resultFormat": "time_series",
+          "schema": 13,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        },
+        {
+          "application": {
+            "filter": ""
+          },
+          "countTriggersBy": "",
+          "datasource": {
+            "type": "alexanderzobnin-zabbix-datasource",
+            "uid": "${DS_ALEXANDERZOBNIN-ZABBIX-DATASOURCE}"
+          },
+          "evaltype": "0",
+          "functions": [],
+          "group": {
+            "filter": "Linux servers"
+          },
+          "host": {
+            "filter": "LINUX"
+          },
+          "item": {
+            "filter": "Linux: System uptime"
+          },
+          "itemTag": {
+            "filter": ""
+          },
+          "macro": {
+            "filter": ""
+          },
+          "options": {
+            "count": false,
+            "disableDataAlignment": false,
+            "showDisabledItems": false,
+            "skipEmptyValues": false,
+            "useTrends": "default",
+            "useZabbixValueMapping": false
+          },
+          "proxy": {
+            "filter": ""
+          },
+          "queryType": "0",
+          "refId": "D",
+          "resultFormat": "time_series",
+          "schema": 13,
+          "table": {
+            "skipEmptyValues": false
+          },
+          "tags": {
+            "filter": ""
+          },
+          "textFilter": "",
+          "trigger": {
+            "filter": ""
+          }
+        }
+      ],
+      "transformations": [
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": ".*CPU utilization.*",
+            "renamePattern": "cpu"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": ".*Load average \\(1m avg\\).*",
+            "renamePattern": "load1"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": ".*Number of CPUs.*",
+            "renamePattern": "cores"
+          }
+        },
+        {
+          "id": "renameByRegex",
+          "options": {
+            "regex": ".*System uptime.*",
+            "renamePattern": "uptime"
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "seriesToRows",
+            "reducers": [
+              "lastNotNull"
+            ]
+          }
+        },
+        {
+          "id": "rowsToFields",
+          "options": {
+            "mappings": [
+              {
+                "fieldName": "Field",
+                "handlerKey": "field.name"
+              },
+              {
+                "fieldName": "Last *",
+                "handlerKey": "field.value"
+              }
+            ]
+          }
+        }
+      ],
+      "transparent": true,
+      "type": "marcusolsson-dynamictext-panel"
+    }
+  ],
+  "preload": false,
+  "schemaVersion": 42,
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "TESTE-CARD",
+  "uid": "adq224w",
+  "version": 4,
+  "weekStart": ""
+}

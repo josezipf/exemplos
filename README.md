@@ -30,3 +30,32 @@ O tráfego recebido em bytes por segundo é convertido para `bps`, `Kbps`, `Mbps
 ## Observação
 
 Os nomes dos campos podem conter ou não acentos. O JavaScript procura automaticamente por `Disponibilidade`, `Latência`, `Perda`, `Tráfego RX` e `Tráfego TX`.
+
+## Importar o dashboard pronto no Grafana
+
+Se preferir, use o dashboard já montado:
+[`TESTE-CARD-1792181310720.json`](TESTE-CARD-1792181310720.json).
+
+### Requisitos
+
+- Grafana 12.x (exportado no 12.4.0)
+- Plugin **Zabbix** (`alexanderzobnin-zabbix-datasource`), configurado com uma fonte de dados
+- Plugin **Business Text** (`marcusolsson-dynamictext-panel`)
+
+### Como baixar
+
+- Abra o arquivo aqui no GitHub e clique em **Download raw file**, ou
+- Pelo terminal:
+
+```bash
+curl -LO https://raw.githubusercontent.com/josezipf/exemplos/main/TESTE-CARD-1792181310720.json
+```
+
+### Como importar
+
+1. No Grafana, vá em **Dashboards → New → Import**.
+2. Clique em **Upload dashboard JSON file** e escolha o arquivo baixado
+   (ou cole o conteúdo do JSON na caixa de texto).
+3. Em **Zabbix**, selecione a sua fonte de dados do Zabbix.
+4. Clique em **Import**.
+5. Ajuste as consultas (host/itens) para o seu ambiente.
