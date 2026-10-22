@@ -1,0 +1,30 @@
+---
+- name: Manutenção de rotina
+  hosts: all
+  become: true
+  tasks:
+    - name: Atualiza cache e aplica patches
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+        upgrade: safe
+
+    - name: Remove pacotes órfãos
+      ansible.builtin.apt:
+        autoremove: true
+        autoclean: true
+
+    - name: Limpa journal com mais de 7 dias
+      ansible.builtin.command: journalctl --vacuum-time=7d
+      register: vacuum
+      changed_when: "'freed 0B' not in vacuum.stderr"
+
+    - name: Espaço em disco na raiz
+      ansible.builtin.command: df -h /
+      register: disco
+      changed_when: false
+      check_mode: false
+
+    - name: Mostra o resultado
+      ansible.builtin.debug:
+        var: disco.stdout_lines

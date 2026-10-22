@@ -1,0 +1,16 @@
+# Sistema / editores
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# Ansible
+*.retry
+
+# Segredos — nunca versionar
+.vault_pass*
+*.pem
+id_*
+!id_*.pub
+.env

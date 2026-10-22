@@ -1,0 +1,146 @@
+---
+- name: Provisiona stack NOC (Zabbix, Grafana, n8n, Semaphore)
+  hosts: local
+  become: true
+  vars:
+    noc_dir: /opt/noc
+    pg_pass: "Noto@Lab2026"   # lab! troque em produção
+    sema_key: >-
+      {{ lookup('password', noc_dir ~ '/.sema_key length=32
+      chars=ascii_letters,digits') | b64encode }}
+
+  tasks:
+    - name: Dependências base
+      ansible.builtin.apt:
+        name: [ca-certificates, curl, gnupg]
+        update_cache: true
+
+    - name: Pasta de keyrings do APT
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Chave GPG do Docker
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: "0644"
+
+    - name: Repositório oficial do Docker
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu
+          {{ ansible_distribution_release }} stable
+        filename: docker
+
+    - name: Docker Engine + Compose plugin
+      ansible.builtin.apt:
+        name: [docker-ce, docker-ce-cli, containerd.io, docker-compose-plugin]
+        update_cache: true
+
+    - name: Docker ativo e no boot
+      ansible.builtin.service:
+        name: docker
+        state: started
+        enabled: true
+
+    - name: Árvore de diretórios do NOC
+      ansible.builtin.file:
+        path: "{{ noc_dir }}/{{ item.dir }}"
+        state: directory
+        owner: "{{ item.uid }}"
+        group: "{{ item.uid }}"
+        mode: "0755"
+      loop:
+        - { dir: zabbix,    uid: 0 }
+        - { dir: grafana,   uid: 472 }
+        - { dir: n8n,       uid: 1000 }
+        - { dir: semaphore, uid: 0 }
+
+    - name: docker-compose.yml unificado
+      ansible.builtin.copy:
+        dest: "{{ noc_dir }}/docker-compose.yml"
+        mode: "0600"
+        content: |
+          x-zbx-db: &zbx-db
+            DB_SERVER_HOST: postgres
+            POSTGRES_USER: zabbix
+            POSTGRES_PASSWORD: "{{ pg_pass }}"
+            POSTGRES_DB: zabbix
+
+          services:
+            postgres:
+              image: postgres:16-alpine
+              restart: unless-stopped
+              environment: *zbx-db
+              volumes: ["./zabbix/pgdata:/var/lib/postgresql/data"]
+
+            zabbix-server:
+              image: zabbix/zabbix-server-pgsql:ubuntu-7.0-latest
+              restart: unless-stopped
+              environment: *zbx-db
+              ports: ["10051:10051"]
+              depends_on: [postgres]
+
+            zabbix-web:
+              image: zabbix/zabbix-web-nginx-pgsql:ubuntu-7.0-latest
+              restart: unless-stopped
+              environment:
+                <<: *zbx-db
+                ZBX_SERVER_HOST: zabbix-server
+                PHP_TZ: America/Sao_Paulo
+              ports: ["8080:8080"]
+              depends_on: [zabbix-server]
+
+            grafana:
+              image: grafana/grafana:latest
+              restart: unless-stopped
+              ports: ["3000:3000"]
+              volumes: ["./grafana:/var/lib/grafana"]
+
+            n8n:
+              image: n8nio/n8n:latest
+              restart: unless-stopped
+              environment:
+                N8N_SECURE_COOKIE: "false"
+                GENERIC_TIMEZONE: America/Sao_Paulo
+              ports: ["5678:5678"]
+              volumes: ["./n8n:/home/node/.n8n"]
+
+            semaphore-db:
+              image: postgres:16-alpine
+              restart: unless-stopped
+              environment:
+                POSTGRES_USER: semaphore
+                POSTGRES_PASSWORD: "{{ pg_pass }}"
+                POSTGRES_DB: semaphore
+              volumes: ["./semaphore/pgdata:/var/lib/postgresql/data"]
+
+            semaphore:
+              image: semaphoreui/semaphore:latest
+              restart: unless-stopped
+              ports: ["30000:3000"]
+              environment:
+                SEMAPHORE_DB_DIALECT: postgres
+                SEMAPHORE_DB_HOST: semaphore-db
+                SEMAPHORE_DB_PORT: "5432"
+                SEMAPHORE_DB_USER: semaphore
+                SEMAPHORE_DB_PASS: "{{ pg_pass }}"
+                SEMAPHORE_DB: semaphore
+                SEMAPHORE_ADMIN: admin
+                SEMAPHORE_ADMIN_PASSWORD: admin
+                SEMAPHORE_ADMIN_NAME: Admin
+                SEMAPHORE_ADMIN_EMAIL: admin@localhost
+                SEMAPHORE_ACCESS_KEY_ENCRYPTION: "{{ sema_key }}"
+              depends_on: [semaphore-db]
+
+    - name: Sobe a stack
+      ansible.builtin.command:
+        cmd: docker compose up -d
+        chdir: "{{ noc_dir }}"
+      register: compose_up
+      changed_when: >-
+        'Started' in compose_up.stderr or
+        'Created' in compose_up.stderr
