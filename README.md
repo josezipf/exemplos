@@ -26,9 +26,14 @@ Depois, entre na pasta do vídeo que você está assistindo e siga o `README.md`
 
 ---
 
-**Avisos**
+## ⚠️ Aviso — uso por sua conta e risco
 
-- Os exemplos foram feitos para **ambiente de laboratório**. Senhas padrão e configurações simplificadas estão marcadas nos arquivos: troque antes de usar em produção.
-- Achou um erro ou tem uma dúvida? Abra uma *issue* neste repositório.
+Todo o conteúdo deste repositório é **material de laboratório, para estudo e conhecimento técnico**.
+
+- Os exemplos usam senhas padrão e configurações simplificadas para facilitar o aprendizado. **Não são prontos para produção.**
+- Sempre teste em ambiente controlado (VM, lab) antes de aplicar em servidores reais.
+- Os arquivos são fornecidos "como estão", sem garantia de qualquer tipo. **O uso é por sua conta e risco**: a NOTO TI não se responsabiliza por danos, indisponibilidade ou perda de dados decorrentes do uso deste material.
+
+Achou um erro ou tem uma dúvida? Abra uma *issue* neste repositório.
 
 **NOTO TI | Monitoramento na prática.** · [nototi.com.br](https://nototi.com.br)
